@@ -1,0 +1,53 @@
+<#
+.NOTES
+===========================================================================
+     
+Created on        : 05/08/2018 05:01 PM
+Created by        : Anumita Bhattacharyya[anumita.bhattacharyya1@wipro.com]
+Last Reviewed By  : Subhash Konduru [Subhash.konduru@wipro.com], [15-03-2018]
+Organization      : Wipro
+Filename          : Remove User from AD Group
+Version           : 1.0
+===========================================================================
+#>
+
+#Fetch AD Group name from CSV File
+$Application = $Application;
+$UserName = $UserName;
+$ApplicationDatas = Import-Csv -Path "C:\Users\Anumita\Desktop\Citrix Application and Groupname Mapping.csv"
+
+foreach($ApplicationData in $ApplicationDatas)
+{
+
+    if ($ApplicationData -ne "")
+    {
+        if ($ApplicationData.ApplicationName -eq $Application )
+        {
+
+        $ApplicationName = $ApplicationData.ApplicationName
+        $GroupName = $ApplicationData.GroupName
+        }
+    }
+}
+
+#Remove User to AD Group
+
+Try
+    {
+    $Flag = $true;
+    $ADGroupName = $GroupName
+
+    Import-Module ActiveDirectory -ErrorAction Stop;
+    Remove-ADGroupMember -Identity $ADGroupName -Members $UserName -ErrorAction Stop -Confirm:$false ;
+    $Flag;
+    Write-Output "Successfully deleted User: $UserName from Group : $ADGroupName .";
+
+    }
+Catch [System.Exception] 
+    {
+	$ErrorMessage = $_;
+    $Flag = $false;
+    $Flag;
+    Write-Output "Unable to delete User: $UserName from Group : $ADGroupName . Error :- $ErrorMessage on the System : $(hostname)";
+    
+    }
